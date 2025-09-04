@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Apple Watch Stopwatch Design</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, 'Helvetica Neue', Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background: radial-gradient(circle at 50% 50%, #1c2526, #2e4057, #4a90e2);
+      background-size: 120% 120%;
+      animation: colorfulGlow 8s ease infinite;
+      overflow: hidden;
+    }
+
+    @keyframes colorfulGlow {
+      0% { background-size: 115% 115%; background-position: 0% 0%; }
+      50% { background-size: 125% 125%; background-position: 50% 50%; }
+      100% { background-size: 115% 115%; background-position: 0% 0%; }
+    }
+
+    .stopwatch-container {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-radius: 50%;
+      padding: 40px;
+      border: 2px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 0 40px rgba(0, 0, 0, 0.6), inset 0 0 20px rgba(255, 255, 255, 0.05);
+      text-align: center;
+      width: 100%;
+      max-width: 450px;
+      aspect-ratio: 1;
+      position: relative;
+      overflow: hidden;
+      transform: scale(0.9);
+      transition: transform 0.5s ease;
+    }
+
+    .stopwatch-container.active {
+      transform: scale(1);
+    }
+
+    .watch-bezel {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      right: 10px;
+      bottom: 10px;
+      border: 2px solid rgba(255, 255, 255, 0.15);
+      border-radius: 50%;
+      z-index: 1;
+      box-shadow: inset 0 0 10px rgba(74, 144, 226, 0.3);
+    }
+
+    .watch-marks {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      width: 2px;
+      height: 8px;
+      background: linear-gradient(to bottom, #ff6b6b, #4ecdc4);
+      transform-origin: bottom;
+      animation: rotateMarks 6s linear infinite;
+    }
+
+    @keyframes rotateMarks {
+      from { transform: translateX(-50%) rotate(0deg); }
+      to { transform: translateX(-50%) rotate(360deg); }
+    }
+
+    .display {
+      font-size: 3.5em;
+      font-weight: 600;
+      margin-bottom: 25px;
+      color: #f5f5f7;
+      letter-spacing: 2px;
+      background: linear-gradient(135deg, rgba(255, 107, 107, 0.2), rgba(78, 205, 196, 0.2));
+      padding: 15px;
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(255, 107, 107, 0.1);
+      position: relative;
+      z-index: 2;
+    }
+
+    .display.running {
+      animation: applePulse 1s infinite alternate, glow 1.5s infinite;
+    }
+
+    @keyframes applePulse {
+      from { transform: scale(1); }
+      to { transform: scale(1.03); }
+    }
+
+    @keyframes glow {
+      0% { box-shadow: 0 0 10px rgba(255, 107, 107, 0.3); }
+      50% { box-shadow: 0 0 20px rgba(78, 205, 196, 0.5); }
+      100% { box-shadow: 0 0 10px rgba(255, 107, 107, 0.3); }
+    }
+
+    .sprinkle {
+      position: absolute;
+      width: 5px;
+      height: 5px;
+      background: radial-gradient(circle, #ff6b6b, #4ecdc4, #4a90e2);
+      border-radius: 50%;
+      pointer-events: none;
+      animation: sprinkleFall 1.2s ease-out forwards;
+      z-index: 3;
+    }
+
+    @keyframes sprinkleFall {
+      0% { opacity: 1; transform: translateY(-20px) scale(0.5); }
+      100% { opacity: 0; transform: translateY(80%) scale(1.2); }
+    }
+
+    .buttons {
+      display: flex;
+      justify-content: space-around;
+      margin-bottom: 20px;
+      position: relative;
+      z-index: 2;
+    }
+
+    button {
+      padding: 12px 25px;
+      font-size: 1.1em;
+      border: none;
+      border-radius: 25px;
+      cursor: pointer;
+      transition: transform 0.2s, background 0.3s;
+      outline: none;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    button:hover {
+      transform: scale(1.05);
+    }
+
+    button:active {
+      transform: scale(0.95);
+    }
+
+    button.clicked .icon {
+      animation: iconGlow 0.5s ease-out;
+    }
+
+    @keyframes iconGlow {
+      0% { text-shadow: 0 0 0px #fff; }
+      50% { text-shadow: 0 0 10px #ff6b6b; }
+      100% { text-shadow: 0 0 0px #fff; }
+    }
+
+    #startPause {
+      background: linear-gradient(135deg, #34c759, #28a745);
+    }
+
+    #lap {
+      background: linear-gradient(135deg, #ffcc00, #ffeb3b);
+    }
+
+    #reset {
+      background: linear-gradient(135deg, #ff2d55, #f44336);
+    }
+
+    .icon {
+      font-size: 1.2em;
+    }
+
+    .laps {
+      list-style: none;
+      max-height: 220px;
+      overflow-y: auto;
+      margin-top: 20px;
+      padding: 10px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      background: linear-gradient(135deg, rgba(255, 107, 107, 0.05), rgba(78, 205, 196, 0.05));
+      border-radius: 10px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .laps li {
+      padding: 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      font-size: 1.2em;
+      color: #f5f5f7;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 8px;
+      margin: 8px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .laps li:last-child {
+      border-bottom: none;
+    }
+
+    .lap-icon {
+      color: #ffeb3b;
+    }
+
+    @media (max-width: 480px) {
+      .stopwatch-container {
+        padding: 20px;
+        max-width: 350px;
+      }
+
+      .display {
+        font-size: 2.5em;
+      }
+
+      button {
+        padding: 10px 20px;
+        font-size: 1em;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="stopwatch-container">
+    <div class="watch-bezel"></div>
+    <div class="watch-marks"></div>
+    <div class="display" id="display">00:00:00.000</div>
+    <div class="buttons">
+      <button id="startPause"><i class="fas fa-play icon"></i> Start</button>
+      <button id="lap" disabled><i class="fas fa-flag-checkered icon"></i> Lap</button>
+      <button id="reset" disabled><i class="fas fa-sync-alt icon"></i> Reset</button>
+    </div>
+    <ul class="laps" id="laps"></ul>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      let timer;
+      let startTime = 0;
+      let elapsedTime = 0;
+      let isRunning = false;
+      let lapCount = 1;
+
+      const display = document.getElementById('display');
+      const startPauseBtn = document.getElementById('startPause');
+      const lapBtn = document.getElementById('lap');
+      const resetBtn = document.getElementById('reset');
+      const lapsList = document.getElementById('laps');
+      const container = document.querySelector('.stopwatch-container');
+
+      if (!display || !startPauseBtn || !lapBtn || !resetBtn || !lapsList || !container) {
+        console.error('One or more DOM elements not found. Check HTML structure.');
+        return;
+      }
+
+      function formatTime(ms) {
+        const hours = Math.floor(ms / (1000 * 60 * 60)).toString().padStart(2, '0');
+        const minutes = Math.floor((ms % (1000 * 60 * 60)) / (1000 * 60)).toString().padStart(2, '0');
+        const seconds = Math.floor((ms % (1000 * 60)) / 1000).toString().padStart(2, '0');
+        const milliseconds = (ms % 1000).toString().padStart(3, '0');
+        return `${hours}:${minutes}:${seconds}.${milliseconds}`;
+      }
+
+      function updateDisplay() {
+        elapsedTime = Date.now() - startTime;
+        display.textContent = formatTime(elapsedTime);
+      }
+
+      function createSprinkle() {
+        const sprinkle = document.createElement('div');
+        sprinkle.classList.add('sprinkle');
+        sprinkle.style.left = `${Math.random() * 90 + 5}%`;
+        sprinkle.style.top = `${Math.random() * 50}%`;
+        container.appendChild(sprinkle);
+        setTimeout(() => sprinkle.remove(), 1200);
+      }
+
+      function addGlow(event) {
+        const button = event.target.closest('button');
+        const icon = button.querySelector('.icon');
+        if (icon) {
+          icon.classList.add('clicked');
+          setTimeout(() => icon.classList.remove('clicked'), 500);
+        }
+      }
+
+      startPauseBtn.addEventListener('click', (e) => {
+        addGlow(e);
+        if (!isRunning) {
+          startTime = Date.now() - elapsedTime;
+          timer = setInterval(updateDisplay, 16);
+          startPauseBtn.innerHTML = '<i class="fas fa-pause icon"></i> Pause';
+          lapBtn.disabled = false;
+          resetBtn.disabled = false;
+          isRunning = true;
+          display.classList.add('running');
+          container.classList.add('active');
+          for (let i = 0; i < 5; i++) {
+            setTimeout(createSprinkle, i * 150);
+          }
+        } else {
+          clearInterval(timer);
+          startPauseBtn.innerHTML = '<i class="fas fa-play icon"></i> Start';
+          lapBtn.disabled = true;
+          isRunning = false;
+          display.classList.remove('running');
+          container.classList.remove('active');
+        }
+      });
+
+      lapBtn.addEventListener('click', (e) => {
+        addGlow(e);
+        const lapTime = formatTime(elapsedTime);
+        const lapItem = document.createElement('li');
+        lapItem.innerHTML = `<span>Lap ${lapCount}</span> <span>${lapTime}</span> <i class="fas fa-stopwatch lap-icon"></i>`;
+        lapsList.appendChild(lapItem);
+        lapCount++;
+      });
+
+      resetBtn.addEventListener('click', (e) => {
+        addGlow(e);
+        clearInterval(timer);
+        startTime = 0;
+        elapsedTime = 0;
+        isRunning = false;
+        display.textContent = '00:00:00.000';
+        startPauseBtn.innerHTML = '<i class="fas fa-play icon"></i> Start';
+        lapBtn.disabled = true;
+        resetBtn.disabled = true;
+        lapsList.innerHTML = '';
+        lapCount = 1;
+        display.classList.remove('running');
+        container.classList.remove('active');
+      });
+
+      console.log('Stopwatch initialized and ready.');
+    });
+  </script>
+</body>
+</html>
